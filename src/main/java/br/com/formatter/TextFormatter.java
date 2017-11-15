@@ -61,7 +61,7 @@ public class TextFormatter {
 	 * @param input
 	 * @return
 	 */
-	public StringBuilder putLimitOnLine(final int maxLineLength, StringBuilder input) {
+	public StringBuilder putLimitOnLine(final int maxLineLength, final StringBuilder input) {
 		StringTokenizer stringTokenizer = new StringTokenizer(input.toString(), " ");
 		StringBuilder output = new StringBuilder();
 
@@ -93,7 +93,7 @@ public class TextFormatter {
 	 * @param text
 	 * @return
 	 */
-	public StringBuilder justifyText(final int maxLineLength, String text) {
+	public StringBuilder justifyText(final int maxLineLength, final String text) {
 		StringBuilder output = new StringBuilder();
 		try {
 			String[] numLines = text.split("\n");

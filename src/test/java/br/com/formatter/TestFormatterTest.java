@@ -64,15 +64,12 @@ public class TestFormatterTest {
 	public void testaJustificacao() {
 		StringBuilder formatedLittleText = formatter.justifyText(20, formatter.putLimitOnLine(20, sbLittleText).toString());
 		assertEquals(1, formatedLittleText.toString().split("\n").length);
-		//como começamos do indice 0, aqui sempre terá +1
-		assertEquals(21, formatedLittleText.toString().split("\n")[0].length());
+		assertEquals(20, formatedLittleText.toString().split("\n")[0].length());
 		
 		StringBuilder formatedMidleText = formatter.justifyText(20, formatter.putLimitOnLine(20, sbMidleText).toString());
-		//como começamos do indice 0, aqui sempre terá +1
-		assertEquals(21, formatedMidleText.toString().split("\n")[0].length());
+		assertEquals(20, formatedMidleText.toString().split("\n")[0].length());
 		
 		StringBuilder formatedBigText = formatter.justifyText(20,formatter.putLimitOnLine(20, sbBigText).toString());
-		//como começamos do indice 0, aqui sempre terá +1
-		assertEquals(21, formatedBigText.toString().split("\n")[0].length());
+		assertEquals(20, formatedBigText.toString().split("\n")[0].length());
 	}
 }

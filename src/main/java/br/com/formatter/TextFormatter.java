@@ -13,6 +13,8 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * Formatador de texto, dados localização do arquivo
  * @author Massao
@@ -34,7 +36,12 @@ public class TextFormatter {
 			
 			Path path = Paths.get(originPath);
 			List<String> lines = Files.readAllLines(path, Charset.forName("ISO-8859-1"));
-			lines.forEach(line -> input.append(line));
+			for(String line : lines) {
+				if(StringUtils.isEmpty(line))
+					input.append(" \n");
+				else
+					input.append(line);
+			}
 
 			System.out.println("Formatando texto");
 			StringBuilder output = putLimitOnLine(lineLength, input);
@@ -61,29 +68,49 @@ public class TextFormatter {
 	 * @param input
 	 * @return
 	 */
-	public StringBuilder putLimitOnLine(final int maxLineLength, final StringBuilder input) {
+	public StringBuilder putLimitOnLine(final int maxLineLength, StringBuilder input) {
 		StringTokenizer stringTokenizer = new StringTokenizer(input.toString(), " ");
 		StringBuilder output = new StringBuilder();
-
+		StringBuilder line = new StringBuilder();
+		
 		int lineLength = 0;
 
 		while(stringTokenizer.hasMoreTokens()) {
 			String word = stringTokenizer.nextToken();
-
+			
+			if("\n".equals(word)) {
+				output.append("\n");
+				continue;
+			}
+			
 			//Caso a palavra seje maior que a linha
 			while(word.length() > maxLineLength) {
-				output.append(word.substring(0, maxLineLength - lineLength) + "\n");
+				//Só adiciono no output, quando acabar uma linha e começar outra
+				line.append(word.substring(0, maxLineLength - lineLength) + "\n");
+				output.append(line.toString());
+
+				line = new StringBuilder();
 				word = word.substring(maxLineLength-lineLength);
 				lineLength=0;
 			}
 
 			if(lineLength + word.length() > maxLineLength) {
+				//Só adiciono no output, quando acabar uma linha e começar outra
+				output.append(line.toString());
 				output.append("\n");
 				lineLength=0;
+				line = new StringBuilder();
 			}
-			output.append(word + " ");
+			
+			line.append(word);
+			
+			if(line.length()< maxLineLength) {
+				line.append(" ");
+			}
+			
 			lineLength+=word.length() + 1;
 		}
+		output.append(line.toString());
 		return output;
 	}
 
@@ -93,14 +120,18 @@ public class TextFormatter {
 	 * @param text
 	 * @return
 	 */
-	public StringBuilder justifyText(final int maxLineLength, final String text) {
+	public StringBuilder justifyText(final int maxLineLength,  String text) {
 		StringBuilder output = new StringBuilder();
 		try {
 			String[] numLines = text.split("\n");
 
 			for(String line : numLines) {
+				
+				if(!StringUtils.isEmpty(line))
+					line = line.trim();
+				
 				if(line.length() < maxLineLength) {
-					int nbackspaceToAdd = maxLineLength - line.length();
+					int nbackspaceToAdd = (maxLineLength - line.length());
 					String[] words =  line.split(" ");
 					int nWords = words.length;
 
@@ -117,32 +148,39 @@ public class TextFormatter {
 						if(nWords == 1) {
 							String newWord = null;
 							String word = mapWords.get(0);
-							newWord = " " + word;
-							mapWords.put(0, newWord);
-							nbackspaceToAdd--;
+							if(StringUtils.isEmpty(word))
+								break;
+							else {
+								newWord  = word;
+								newWord = " " + word;
+								mapWords.put(0, newWord);
+								nbackspaceToAdd--;
+							}
 						}else {
 							for(int indexWord=1; indexWord<nWords; indexWord++) {
-								if(nbackspaceToAdd==0)
+								if(nbackspaceToAdd>0) {
+									String newWord = null;
+									String word = mapWords.get(indexWord);
+									newWord = " " + word;
+									mapWords.put(indexWord, newWord);
+									nbackspaceToAdd--;	
+								}else {
+									nbackspaceToAdd--;
 									break;
-
-								String newWord = null;
-								String word = mapWords.get(indexWord);
-								newWord = " " + word;
-								mapWords.put(indexWord, newWord);
-								nbackspaceToAdd--;
+								}
 							}
 						}
 					}
 					
-					for(int indexWord=0; indexWord<=mapWords.values().size(); indexWord++) {
-						if(indexWord==mapWords.values().size())
-							output.append(mapWords.get(indexWord));
-						else
-							output.append(mapWords.get(indexWord) + " ");
-						output.append("\n");
+					StringBuilder sbLine = new StringBuilder(); 
+					for(String word : mapWords.values()) {
+						sbLine.append(word);
+						if(sbLine.length() < maxLineLength)
+							sbLine.append(" ");
 					}
+					output.append(sbLine.toString() + "\n");
 				}else {
-					output.append(line + "\n");
+					output.append(line+"\n");
 				}
 			}
 		}catch(Exception e) {
